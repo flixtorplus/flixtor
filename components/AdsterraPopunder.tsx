@@ -4,8 +4,8 @@
 import { useEffect, useRef } from 'react';
 
 const POPUNDER_SRC = 'https://aarems.org/1/d587c23f8007ca65d84c4e30bd3650a5';
-const INITIAL_DELAY_MS = 30 * 1000; // 30 seconds grace period
-const COOLDOWN_MS = 3 * 60 * 1000;  // 3 minutes cooldown
+const INITIAL_DELAY_MS = 10 * 1000; // 30 seconds grace period
+const COOLDOWN_MS = 1 * 60 * 1000;  // 3 minutes cooldown
 
 export default function AdsterraPopunder() {
   const isReadyRef = useRef(false);
