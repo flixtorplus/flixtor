@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import Loading from '@/components/Loading';
+import AdsterraPopunder from "@/components/AdsterraPopunder"; // <-- Added global popunder
 import Script from "next/script";
 
 const inter = Inter({
@@ -283,7 +284,7 @@ export default function RootLayout({
         <main id="main-content" className="min-h-screen">
           {children}
         </main>
-
+        <AdsterraPopunder />
         <Footer />
       </body>
     </html>

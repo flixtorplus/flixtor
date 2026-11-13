@@ -5,12 +5,12 @@ import { AdsterraAd } from './AdsterraAd';
 
 // Your ad keys
 const ADS = {
-  BANNER_300x250: '8162f7b8c34974f34a974b6e7ecfc56c',    // Rectangle
-  BANNER_468x60: '745e2712b632a7e90737a12711a26228',     // Horizontal banner
-  BANNER_160x300: 'f10dd5f554899b66a9d7eec5a58b49f7',    // Vertical banner
-  BANNER_160x600: 'aa76f23698a22f4a9ec38a45157572c4',    // Skyscraper
-  BANNER_320x50: '544daa93088c3c86f28ec10f4046a519',     // Mobile banner
-  BANNER_728x90: '60584ead4a4b3bc902dd117145425ef6',     // Desktop banner
+  BANNER_300x250: 'e90978e45f95d0a3b472888c14c8f6c6',    // Rectangle (Updated)[cite: 3]
+  BANNER_468x60: '745e2712b632a7e90737a12711a26228',     // Horizontal banner[cite: 3]
+  BANNER_160x300: 'f10dd5f554899b66a9d7eec5a58b49f7',    // Vertical banner[cite: 3]
+  BANNER_160x600: 'aa76f23698a22f4a9ec38a45157572c4',    // Skyscraper[cite: 3]
+  BANNER_320x50: '544daa93088c3c86f28ec10f4046a519',     // Mobile banner[cite: 3]
+  BANNER_728x90: '60584ead4a4b3bc902dd117145425ef6',     // Desktop banner[cite: 3]
 };
 
 // Responsive Top Banner
