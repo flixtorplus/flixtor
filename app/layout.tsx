@@ -3,8 +3,8 @@ import { Inter, Montserrat, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import Loading from '@/components/Loading';
-import AdsterraPopunder from "@/components/AdsterraPopunder"; // <-- Added global popunder
+import Loading from "@/components/Loading";
+import AdsterraPopunder from "@/components/AdsterraPopunder";
 import Script from "next/script";
 
 const inter = Inter({
@@ -27,6 +27,22 @@ const dmSans = DM_Sans({
 
 const SITE_URL = "https://flixtor.plus";
 
+/* ------------------------------------------------------------------
+   SHARED SOCIAL IMAGE
+   Used for:
+     - Open Graph (Telegram, Facebook, WhatsApp, Discord, Slack, iMessage, LinkedIn)
+     - Twitter Card
+     - Google search results thumbnail (Google reads og:image)
+   Requirements for Google to actually display it:
+     * absolute URL, publicly reachable
+     * recommended 1200x630 (min 300x200)
+     * not blocked by robots.txt
+------------------------------------------------------------------ */
+const SOCIAL_IMAGE = `${SITE_URL}/img/og-image.png`;
+const SOCIAL_IMAGE_WIDTH = 1200;
+const SOCIAL_IMAGE_HEIGHT = 630;
+const SOCIAL_IMAGE_ALT = "FlixTor — Watch Free Movies & Popular TV Shows in Full HD";
+
 export const viewport: Viewport = {
   themeColor: "#06080C",
   width: "device-width",
@@ -44,7 +60,8 @@ export const metadata: Metadata = {
     template: "%s | FlixTor",
   },
 
-  description: "Watch free movies and TV shows in Full HD on FlixTor. Stream the latest titles online, no cost, no limits.",
+  description:
+    "Watch free movies and TV shows in Full HD on FlixTor. Stream the latest titles online, no cost, no limits.",
 
   keywords: [
     // PRIMARY BRAND
@@ -85,35 +102,53 @@ export const metadata: Metadata = {
       index: true,
       follow: true,
       "max-video-preview": -1,
-      "max-image-preview": "large",
+      "max-image-preview": "large", // <-- REQUIRED for Google to show big thumbnail in results
       "max-snippet": -1,
     },
   },
 
+  /* ---------------- OPEN GRAPH (Telegram, FB, WhatsApp, Discord, etc.) ---------------- */
   openGraph: {
     title: "FlixTor - Watch Free Movies & Popular TV Shows Full HD",
-    description: "FlixTor is a free streaming platform to watch movies and TV shows in Full HD. Stream the latest FlixTor content online with no sign-up required.",
+    description:
+      "FlixTor is a free streaming platform to watch movies and TV shows in Full HD. Stream the latest FlixTor content online with no sign-up required.",
     url: SITE_URL,
     siteName: "FlixTor",
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: "/img/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "FlixTor - Watch Free Movies & Popular TV Shows Full HD",
+        url: SOCIAL_IMAGE,
+        secureUrl: SOCIAL_IMAGE,
+        width: SOCIAL_IMAGE_WIDTH,
+        height: SOCIAL_IMAGE_HEIGHT,
+        alt: SOCIAL_IMAGE_ALT,
+        type: "image/jpeg",
       },
     ],
   },
 
+  /* ---------------- TWITTER / X CARD ---------------- */
   twitter: {
     card: "summary_large_image",
     title: "FlixTor - Watch Free Movies & Popular TV Shows Full HD",
-    description: "FlixTor is the best platform for free movies and TV shows in Full HD. No sign-up required.",
-    images: ["/img/og-image.jpg"],
+    description:
+      "FlixTor is the best platform for free movies and TV shows in Full HD. No sign-up required.",
+    images: [SOCIAL_IMAGE],
     creator: "@flixtor",
     site: "@flixtor",
+  },
+
+  /* ---------------- GOOGLE SEARCH THUMBNAIL ----------------
+     Google also accepts a secondary image via "other" — safe to add
+     even though og:image is the primary source.
+  ----------------------------------------------------------- */
+  other: {
+    "og:image:secure_url": SOCIAL_IMAGE,
+    "og:image:type": "image/jpeg",
+    "og:image:width": String(SOCIAL_IMAGE_WIDTH),
+    "og:image:height": String(SOCIAL_IMAGE_HEIGHT),
+    "og:image:alt": SOCIAL_IMAGE_ALT,
   },
 
   icons: {
@@ -181,12 +216,13 @@ export default function RootLayout({
     name: "FlixTor - Free Movies & Popular TV Shows Full HD",
     alternateName: "FlixTor Movies | Best Full HD Streaming Site",
     url: SITE_URL,
-    description: "FlixTor is a free streaming platform to watch movies and TV shows in Full HD. Stream the latest FlixTor content online with no sign-up required.",
+    description:
+      "FlixTor is a free streaming platform to watch movies and TV shows in Full HD. Stream the latest FlixTor content online with no sign-up required.",
     potentialAction: {
       "@type": "SearchAction",
-      "target": {
+      target: {
         "@type": "EntryPoint",
-        "urlTemplate": `${SITE_URL}/search?q={search_term_string}`,
+        urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },
@@ -213,7 +249,9 @@ export default function RootLayout({
     alternateName: "FlixTor",
     url: SITE_URL,
     logo: `${SITE_URL}/img/logo.png`,
-    description: "FlixTor is the best free streaming platform for movies and popular TV shows in Full HD.",
+    image: SOCIAL_IMAGE,
+    description:
+      "FlixTor is the best free streaming platform for movies and popular TV shows in Full HD.",
     sameAs: [
       "https://twitter.com/flixtor",
       "https://instagram.com/flixtor",
@@ -230,7 +268,10 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${inter.variable} ${montserrat.variable} ${dmSans.variable}`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${montserrat.variable} ${dmSans.variable}`}
+    >
       <head>
         <link rel="preconnect" href="https://image.tmdb.org" />
         <link rel="preconnect" href="https://api.themoviedb.org" />
@@ -238,19 +279,34 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://api.themoviedb.org" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
 
-        <link rel="alternate" type="application/rss+xml" title="FlixTor RSS Feed" href="/feed.xml" />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="FlixTor RSS Feed"
+          href="/feed.xml"
+        />
         <link rel="preload" as="image" href="/img/logo.png" fetchPriority="high" />
+
+        {/* Preload the OG / Google results image so it's cached everywhere */}
+        <link
+          rel="preload"
+          as="image"
+          href="/img/og-image.png"
+          fetchPriority="low"
+        />
 
         <meta name="msapplication-TileColor" content="#01FAFD" />
         <meta name="msapplication-TileImage" content="/img/favicons/mstile-144x144.png" />
         <meta name="msapplication-config" content="/img/favicons/browserconfig.xml" />
 
-        <meta httpEquiv="Strict-Transport-Security" content="max-age=63072000; includeSubDomains; preload" />
+        <meta
+          httpEquiv="Strict-Transport-Security"
+          content="max-age=63072000; includeSubDomains; preload"
+        />
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
         <meta httpEquiv="X-Frame-Options" content="DENY" />
       </head>
       <body className="font-sans antialiased bg-[#06080C] text-white">
-
         <Script
           src="https://www.googletagmanager.com/gtm.js?id=GTM-MVBTKVLW"
           strategy="afterInteractive"
@@ -272,7 +328,10 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
         />
+
+        {/* Fullscreen overlay — sits ON TOP of real page content */}
         <Loading />
+
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[250] focus:px-4 focus:py-2 focus:bg-[#01FAFD] focus:text-[#06080C] focus:rounded-lg focus:font-bold"

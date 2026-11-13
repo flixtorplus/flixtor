@@ -1,45 +1,108 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { RefreshCw, Home } from "lucide-react";
 
-/* =========================================================
-   INNER LOGIC — uses useSearchParams (needs Suspense wrapper)
-   ========================================================= */
-function LoadingLogic() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const [isVisible, setIsVisible] = useState(false);
-  const [isLazy, setIsLazy] = useState(false);
+/**
+ * Fullscreen page overlay.
+ *
+ * - ALWAYS mounted in the DOM (rendered from RootLayout). Real page content
+ *   is rendered underneath it from SSR, so "View Source" shows the real page
+ *   markup — this overlay is just a visual layer on top.
+ * - Stays visible until:
+ *     1. `window.load` fires (all images/scripts done),
+ *     2. `document.fonts.ready` resolves (fonts loaded),
+ *     3. a small minimum time (avoid flash on very fast loads).
+ * - Falls back to the recovery panel if loading takes too long.
+ */
+export default function Loading() {
+  const [isVisible, setIsVisible] = useState(true);
+  const [isFading, setIsFading] = useState(false);
+  const [isLazy, setIsLazy] = useState(false); // recovery mode
 
   useEffect(() => {
-    setIsVisible(true);
-    setIsLazy(false);
+    // Lock scroll while overlay is visible.
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
-    const hideTimer = setTimeout(() => setIsVisible(false), 700);
+    let finished = false;
 
-    const safetyTimer = setTimeout(() => {
-      setIsLazy(true);
-      setTimeout(() => setIsVisible(false), 3000);
-    }, 6000);
+    const MIN_MS = 700;          // don't flash on very fast loads
+    const RECOVERY_MS = 8000;    // show recovery panel after this long
+    const HARD_STOP_MS = 15000;  // absolute max wait
+
+    const start = Date.now();
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+
+      // Fade out, then unmount visually (content underneath is unaffected).
+      setIsFading(true);
+      window.setTimeout(() => {
+        setIsVisible(false);
+        document.body.style.overflow = prevOverflow || "";
+      }, 500);
+    };
+
+    const waitMinThenFinish = () => {
+      const elapsed = Date.now() - start;
+      const wait = Math.max(0, MIN_MS - elapsed);
+      window.setTimeout(finish, wait);
+    };
+
+    const whenReady = async () => {
+      // 1) Fonts
+      try {
+        if ((document as any).fonts?.ready) {
+          await (document as any).fonts.ready;
+        }
+      } catch {
+        /* ignore */
+      }
+
+      // 2) window load (images, CSS, etc.)
+      if (document.readyState === "complete") {
+        waitMinThenFinish();
+      } else {
+        const onLoad = () => {
+          window.removeEventListener("load", onLoad);
+          waitMinThenFinish();
+        };
+        window.addEventListener("load", onLoad, { once: true });
+      }
+    };
+
+    whenReady();
+
+    // Recovery panel after 8s if still loading.
+    const recoveryTimer = window.setTimeout(() => setIsLazy(true), RECOVERY_MS);
+
+    // Hard stop — never trap the user.
+    const hardStop = window.setTimeout(finish, HARD_STOP_MS);
 
     return () => {
-      clearTimeout(hideTimer);
-      clearTimeout(safetyTimer);
+      window.clearTimeout(recoveryTimer);
+      window.clearTimeout(hardStop);
+      document.body.style.overflow = prevOverflow || "";
     };
-  }, [pathname, searchParams]);
+  }, []);
 
+  // Fully unmount once faded out (content underneath stays untouched).
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-[99999] bg-[#06080C] w-screen h-screen flex flex-col items-center justify-center m-0 p-0 overflow-hidden select-none left-0 top-0">
-
+    <div
+      data-page-loader="true"
+      aria-hidden="true"
+      className={`fixed inset-0 z-[99999] bg-[#06080C] w-screen h-screen flex flex-col items-center justify-center m-0 p-0 overflow-hidden select-none left-0 top-0 transition-opacity duration-500 ease-out ${
+        isFading ? "opacity-0 pointer-events-none" : "opacity-100"
+      }`}
+    >
       {/* Animations */}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes netflixExpand {
           0% { transform: scaleX(0); opacity: 0.2; }
           40% { transform: scaleX(0.6); opacity: 1; }
@@ -69,10 +132,8 @@ function LoadingLogic() {
 
       {/* Main Wrapper */}
       <div className="relative z-10 flex flex-col items-center justify-center text-center w-full max-w-xs px-4">
-
         {!isLazy ? (
           <div className="flex flex-col items-center w-full">
-
             {/* Logo */}
             <div className="relative w-32 h-32 flex items-center justify-center mb-5 overflow-visible">
               <div className="relative w-24 h-24 z-10 animate-brand-pulse">
@@ -95,7 +156,6 @@ function LoadingLogic() {
             <span className="text-[11px] font-mono font-bold tracking-[0.35em] text-zinc-400 uppercase mr-[-0.35em] animate-pulse">
               Loading Data.
             </span>
-
           </div>
         ) : (
           /* Recovery Panel */
@@ -125,16 +185,5 @@ function LoadingLogic() {
       <div className="absolute bottom-6 left-8 font-mono text-[8px] text-zinc-800 tracking-[0.2em] hidden sm:block">DATA_FEED_ACTIVE</div>
       <div className="absolute bottom-6 right-8 font-mono text-[8px] text-zinc-800 tracking-[0.2em] hidden sm:block">FLIXTOR_CORE</div>
     </div>
-  );
-}
-
-/* =========================================================
-   MAIN EXPORT
-   ========================================================= */
-export default function Loading() {
-  return (
-    <Suspense fallback={null}>
-      <LoadingLogic />
-    </Suspense>
   );
 }
