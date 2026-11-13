@@ -248,7 +248,7 @@ export default function RootLayout({
     name: "FlixTor - Free Full HD Movies & TV Shows",
     alternateName: "FlixTor",
     url: SITE_URL,
-    logo: `${SITE_URL}/img/logo.png`,
+    logo: `${SITE_URL}/img/og-image.png`,
     image: SOCIAL_IMAGE,
     description:
       "FlixTor is the best free streaming platform for movies and popular TV shows in Full HD.",
@@ -285,7 +285,7 @@ export default function RootLayout({
           title="FlixTor RSS Feed"
           href="/feed.xml"
         />
-        <link rel="preload" as="image" href="/img/logo.png" fetchPriority="high" />
+        <link rel="preload" as="image" href="/img/og-image.png" fetchPriority="high" />
 
         {/* Preload the OG / Google results image so it's cached everywhere */}
         <link
